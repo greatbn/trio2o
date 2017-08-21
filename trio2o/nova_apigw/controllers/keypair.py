@@ -52,12 +52,46 @@ class KeypairController(rest.RestController):
 
         return {'keypair': keypair}
 
-        @expose(generic=True, template='json')
-        def get_all(self):
-            context = t_context.extract_context_from_environ()
+    @expose(generic=True, template='json')
+    def get_one(self, _id):
+        context = t_context.extract_context_from_environ()
+        with context.session.begin():
+            keypairs = core.query_resource(context, models.KeyPair,
+                                           [{'key': 'name',
+                                             'comparator': 'eq',
+                                             'value': _id}], [])
+            if not keypairs:
+                return utils.format_nova_error(
+                    404, _('Keypair %s could not be found') % _id)
+            keypair = keypairs[0]
+            return {'keypair': keypair}
+
+    @expose(generic=True, template='json')
+    def get(self):
+        context = t_context.extract_context_from_environ()
+        with context.session.begin():
+            keypairs = core.query_resource(context, models.KeyPair,
+                                        [], [])
+            return {'keypairs': [dict(
+                [('name', keypair['name']),
+                ('fingerprint', keypair['fingerprint'])]) for keypair in keypairs]}
+
+    @expose(generic=True, template='json')
+    def delete(self, _id):
+        context = t_context.extract_context_from_environ()
+        try:
             with context.session.begin():
                 keypairs = core.query_resource(context, models.KeyPair,
-                                            [], [])
-                return {'keypair': [dict(
-                    [('name', keypair['name']),
-                    ('fingerprint', keypair['fingerprint'])]) for keypair in keypairs]}
+                                               [{'key': 'name',
+                                                 'comparator': 'eq',
+                                                 'value': _id}], [])
+                print "delete ", keypairs[0]['id']
+                if not keypairs:
+                    return utils.format_nova_error(
+                        404, _('Keypair %s could not be found') % _id)
+                core.delete_resource(context,
+                                     models.KeyPair, keypairs[0]['id'])
+        except Exception:
+            return utils.format_nova_error(500, _('Failed to delete keypair'))
+        pecan.response.status = 202
+        return

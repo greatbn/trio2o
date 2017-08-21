@@ -383,11 +383,11 @@ class Client(object):
         if cxt.is_admin and not cxt.auth_token:
             cxt.auth_token = self._get_admin_token()
             cxt.tenant = self._get_admin_project_id()
-
+        session = self._get_keystone_session()
         service = self.resource_service_map[resource]
         handle = self.service_handle_map[service]
         filters = filters or []
-        return handle.handle_list(cxt, resource, filters)
+        return handle.handle_list(cxt, resource, filters, session)
 
     @_safe_operation('create')
     def create_resources(self, resource, cxt, *args, **kwargs):
@@ -417,10 +417,10 @@ class Client(object):
         if cxt.is_admin and not cxt.auth_token:
             cxt.auth_token = self._get_admin_token()
             cxt.tenant = self._get_admin_project_id()
-
+        session = self._get_keystone_session()
         service = self.resource_service_map[resource]
         handle = self.service_handle_map[service]
-        return handle.handle_create(cxt, resource, *args, **kwargs)
+        return handle.handle_create(cxt, resource, session, *args, **kwargs)
 
     @_safe_operation('update')
     def update_resources(self, resource, cxt, *args, **kwargs):
@@ -446,10 +446,10 @@ class Client(object):
         if cxt.is_admin and not cxt.auth_token:
             cxt.auth_token = self._get_admin_token()
             cxt.tenant = self._get_admin_project_id()
-
+        session = self._get_keystone_session()
         service = self.resource_service_map[resource]
         handle = self.service_handle_map[service]
-        return handle.handle_update(cxt, resource, *args, **kwargs)
+        return handle.handle_update(cxt, resource, session, *args, **kwargs)
 
     @_safe_operation('delete')
     def delete_resources(self, resource, cxt, resource_id):
@@ -468,10 +468,10 @@ class Client(object):
         if cxt.is_admin and not cxt.auth_token:
             cxt.auth_token = self._get_admin_token()
             cxt.tenant = self._get_admin_project_id()
-
+        session = self._get_keystone_session()
         service = self.resource_service_map[resource]
         handle = self.service_handle_map[service]
-        return handle.handle_delete(cxt, resource, resource_id)
+        return handle.handle_delete(cxt, resource, resource_id, session)
 
     @_safe_operation('get')
     def get_resources(self, resource, cxt, resource_id):
@@ -490,10 +490,10 @@ class Client(object):
         if cxt.is_admin and not cxt.auth_token:
             cxt.auth_token = self._get_admin_token()
             cxt.tenant = self._get_admin_project_id()
-
+        session = self._get_keystone_session()
         service = self.resource_service_map[resource]
         handle = self.service_handle_map[service]
-        return handle.handle_get(cxt, resource, resource_id)
+        return handle.handle_get(cxt, resource, resource_id, session)
 
     @_safe_operation('action')
     def action_resources(self, resource, cxt, action, *args, **kwargs):
@@ -528,7 +528,7 @@ class Client(object):
         if cxt.is_admin and not cxt.auth_token:
             cxt.auth_token = self._get_admin_token()
             cxt.tenant = self._get_admin_project_id()
-
+        session = self._get_keystone_session()
         service = self.resource_service_map[resource]
         handle = self.service_handle_map[service]
-        return handle.handle_action(cxt, resource, action, *args, **kwargs)
+        return handle.handle_action(cxt, resource, action, session, *args, **kwargs)

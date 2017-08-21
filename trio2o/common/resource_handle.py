@@ -214,15 +214,17 @@ class NovaResourceHandle(ResourceHandle):
                         'aggregate': LIST | CREATE | DELETE | ACTION,
                         'server_volume': ACTION}
 
-    def _get_client(self, cxt):
+    def _get_client(self, cxt, session=None):
         url = self.endpoint_url.replace('$(tenant_id)s', cxt.tenant)
         cli = n_client.Client(api_versions.APIVersion(cxt.nova_micro_version),
-                              auth_token=cxt.auth_token,
-                              auth_url=self.auth_url,
-                              project_name=cxt.tenant_name,
-                              project_domain_name=cxt.project_domain,
-                              endpoint_override=url,
-                              timeout=cfg.CONF.client.nova_timeout)
+                              session=session)
+        # cli = n_client.Client(api_versions.APIVersion(cxt.nova_micro_version),
+        #                       auth_token=cxt.auth_token,
+        #                       auth_url=self.auth_url,
+        #                       project_name=cxt.tenant_name,
+        #                       project_domain_name=cxt.project_domain,
+        #                       endpoint_override=url,
+        #                       timeout=cfg.CONF.client.nova_timeout)
         return cli
 
     def _adapt_resource(self, resource):
@@ -231,16 +233,16 @@ class NovaResourceHandle(ResourceHandle):
         else:
             return resource
 
-    def handle_list(self, cxt, resource, filters):
+    def handle_list(self, cxt, resource, filters, session=None):
         try:
             resource = self._adapt_resource(resource)
-            client = self._get_client(cxt)
+            client = self._get_client(cxt=cxt, session=session)
             collection = '%ss' % resource
             # only server list supports filter
             if resource == 'server':
                 search_opts = _transform_filters(filters)
-                return [res.to_dict() for res in getattr(
-                    client, collection).list(search_opts=search_opts)]
+                return [res.to_dict() for res in getattr(client,
+                                                         collection).list(search_opts=search_opts)]
             else:
                 return [res.to_dict() for res in getattr(client,
                                                          collection).list()]
@@ -249,10 +251,10 @@ class NovaResourceHandle(ResourceHandle):
             raise exceptions.EndpointNotAvailable('nova',
                                                   client.client.management_url)
 
-    def handle_create(self, cxt, resource, *args, **kwargs):
+    def handle_create(self, cxt, resource, session, *args, **kwargs):
         try:
             resource = self._adapt_resource(resource)
-            client = self._get_client(cxt)
+            client = self._get_client(cxt, session)
             collection = '%ss' % resource
             return getattr(client, collection).create(
                 *args, **kwargs).to_dict()
@@ -261,10 +263,10 @@ class NovaResourceHandle(ResourceHandle):
             raise exceptions.EndpointNotAvailable('nova',
                                                   client.client.management_url)
 
-    def handle_get(self, cxt, resource, resource_id):
+    def handle_get(self, cxt, resource, resource_id, session):
         try:
             resource = self._adapt_resource(resource)
-            client = self._get_client(cxt)
+            client = self._get_client(cxt, session)
             collection = '%ss' % resource
             return getattr(client, collection).get(resource_id).to_dict()
         except r_exceptions.ConnectTimeout:
@@ -275,10 +277,10 @@ class NovaResourceHandle(ResourceHandle):
             LOG.debug("%(resource)s %(resource_id)s not found",
                       {'resource': resource, 'resource_id': resource_id})
 
-    def handle_delete(self, cxt, resource, resource_id):
+    def handle_delete(self, cxt, resource, resource_id, session):
         try:
             resource = self._adapt_resource(resource)
-            client = self._get_client(cxt)
+            client = self._get_client(cxt, session)
             collection = '%ss' % resource
             return getattr(client, collection).delete(resource_id)
         except r_exceptions.ConnectTimeout:
@@ -289,10 +291,10 @@ class NovaResourceHandle(ResourceHandle):
             LOG.debug("Delete %(resource)s %(resource_id)s which not found",
                       {'resource': resource, 'resource_id': resource_id})
 
-    def handle_action(self, cxt, resource, action, *args, **kwargs):
+    def handle_action(self, cxt, resource, action, session, *args, **kwargs):
         try:
             resource = self._adapt_resource(resource)
-            client = self._get_client(cxt)
+            client = self._get_client(cxt, session)
             collection = '%ss' % resource
             resource_manager = getattr(client, collection)
             resource_manager.convert_into_with_meta = _convert_into_with_meta

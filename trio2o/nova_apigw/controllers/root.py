@@ -68,7 +68,8 @@ class V21Controller(object):
             'images': image.ImageController,
             'os-quota-sets': quota_sets.QuotaSetsController,
             'limits': quota_sets.LimitsController,
-            'os-networks': network.NetworkController
+            'os-networks': network.NetworkController,
+            'os-keypairs': keypair.KeyPairController,
         }
         self.server_sub_controller = {
             'os-volume_attachments': volume.VolumeController,

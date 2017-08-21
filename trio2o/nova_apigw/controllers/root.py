@@ -69,6 +69,10 @@ class V21Controller(object):
             'os-quota-sets': quota_sets.QuotaSetsController,
             'limits': quota_sets.LimitsController,
             'os-networks': network.NetworkController,
+            ### To Do
+            # 'os-hypervisors': hypervisor.HypervisorController,
+            # 'extensions': extension.ExtensionController,
+            'os-keypairs': keypair.KeypairController
         }
         self.server_sub_controller = {
             'os-volume_attachments': volume.VolumeController,

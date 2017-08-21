@@ -17,6 +17,7 @@ import pecan
 from pecan import expose
 from pecan import rest
 
+import uuid
 import oslo_db.exception as db_exc
 
 import trio2o.common.context as t_context
@@ -125,14 +126,17 @@ class FlavorController(rest.RestController):
                                                   required_fields):
             utils.format_nova_error(
                 400, _('Invalid input for field/attribute flavor.'))
-
+        if kw['flavor'].get('id'):
+            flavor_id = kw['flavor'].get('id')
+        else:
+            flavor_id = str(uuid.uuid4())  
         flavor_dict = {
             'name': kw['flavor']['name'],
-            'flavorid': kw['flavor'].get('id'),
+            'flavorid': flavor_id,
             'memory_mb': kw['flavor']['ram'],
             'vcpus': kw['flavor']['vcpus'],
             'root_gb': kw['flavor']['disk'],
-            'ephemeral_gb': kw[ 'flavor'].get('OS-FLV-EXT-DATA:ephemeral', 0),
+            'ephemeral_gb': kw['flavor'].get('OS-FLV-EXT-DATA:ephemeral', 0),
             'swap': kw['flavor'].get('swap', 0),
             'rxtx_factor': kw['flavor'].get('rxtx_factor', 1.0),
             'is_public': kw['flavor'].get('os-flavor-access:is_public', True),
@@ -221,7 +225,7 @@ class FlavorController(rest.RestController):
         return
 
 class FlavorExtraSpecs(rest.RestController):
-    
+    # Sa Pham flavor extra specs request
     def __init__(self, project_id, flavor_id):
         self.project_id = project_id
         self.flavor_id = flavor_id

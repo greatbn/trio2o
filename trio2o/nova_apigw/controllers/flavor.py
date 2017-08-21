@@ -132,7 +132,7 @@ class FlavorController(rest.RestController):
             'memory_mb': kw['flavor']['ram'],
             'vcpus': kw['flavor']['vcpus'],
             'root_gb': kw['flavor']['disk'],
-            'ephemeral_gb': kw['flavor'].get('OS-FLV-EXT-DATA:ephemeral', 0),
+            'ephemeral_gb': kw[ 'flavor'].get('OS-FLV-EXT-DATA:ephemeral', 0),
             'swap': kw['flavor'].get('swap', 0),
             'rxtx_factor': kw['flavor'].get('rxtx_factor', 1.0),
             'is_public': kw['flavor'].get('os-flavor-access:is_public', True),
@@ -170,7 +170,11 @@ class FlavorController(rest.RestController):
                                               [], [])
                 for flavor in flavors:
                     flavor['id'] = flavor['flavorid']
+                    flavor['ram'] = flavor['memory_mb']
+                    flavor['disk'] = flavor["root_gb"]
                     del flavor['flavorid']
+                    del flavor['memory_mb']
+                    del flavor["root_gb"]
                 return {'flavors': flavors}
         else:
             with context.session.begin():

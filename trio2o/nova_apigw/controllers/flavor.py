@@ -219,3 +219,22 @@ class FlavorController(rest.RestController):
             return utils.format_nova_error(500, _('Failed to delete flavor'))
         pecan.response.status = 202
         return
+
+class FlavorExtraSpecs(rest.RestController):
+    
+    def __init__(self, project_id, flavor_id):
+        self.project_id = project_id
+        self.flavor_id = flavor_id
+
+    @expose(generic=True, template='json')
+    def get(self):
+        context = t_context.extract_context_from_environ()
+        with context.session.begin():
+            extra_specs = core.query_resource(context, models.InstanceTypeExtraSpecs,
+                                          [{'key': 'instance_type_id',
+                                            'comparator': 'eq',
+                                            'value': self.flavor_id}], [])
+            if not extra_specs:
+                return {'extra_specs': extra_specs}
+            extra_specs = extra_specs[0]
+            return {'extra_specs': extra_specs}

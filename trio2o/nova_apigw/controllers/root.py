@@ -69,11 +69,11 @@ class V21Controller(object):
             'os-quota-sets': quota_sets.QuotaSetsController,
             'limits': quota_sets.LimitsController,
             'os-networks': network.NetworkController,
-            'os-keypairs': keypair.KeyPairController,
         }
         self.server_sub_controller = {
             'os-volume_attachments': volume.VolumeController,
-            'action': action.ActionController
+            'action': action.ActionController,
+            'os-extra_specs': flavor.FlavorExtraSpecs
         }
 
     def _get_resource_controller(self, project_id, remainder):
@@ -84,14 +84,14 @@ class V21Controller(object):
         if resource not in self.resource_controller:
             pecan.abort(404)
             return
-        if resource == 'servers' and len(remainder) >= 3:
-            server_id = remainder[1]
+        if len(remainder) >= 3:
+            resource_id = remainder[1]
             sub_resource = remainder[2]
             if sub_resource not in self.server_sub_controller:
                 pecan.abort(404)
                 return
             return self.server_sub_controller[sub_resource](
-                project_id, server_id), remainder[3:]
+                project_id, resource_id), remainder[3:]
         return self.resource_controller[resource](project_id), remainder[1:]
 
     @pecan.expose()

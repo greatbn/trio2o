@@ -36,7 +36,7 @@ from trio2o.nova_apigw.controllers import server
 from trio2o.nova_apigw.controllers import volume
 from trio2o.nova_apigw.controllers import extension
 from trio2o.nova_apigw.controllers import keypair
-
+from trio2o.nova_apigw.controllers import availability_zone
 
 LOG = logging.getLogger(__name__)
 
@@ -73,8 +73,9 @@ class V21Controller(object):
             'os-networks': network.NetworkController,
             ### To Do
             # 'os-hypervisors': hypervisor.HypervisorController,
+            'os-availability-zone': availability_zone.AvailabilityZoneController,
             'extensions': extension.ExtensionController,
-            'os-keypairs': keypair.KeypairController
+            'os-keypairs': keypair.KeypairController,
         }
         self.server_sub_controller = {
             'os-volume_attachments': volume.VolumeController,

@@ -212,7 +212,8 @@ class NovaResourceHandle(ResourceHandle):
     support_resource = {'flavor': LIST,
                         'server': LIST | CREATE | DELETE | GET | ACTION,
                         'aggregate': LIST | CREATE | DELETE | ACTION,
-                        'server_volume': ACTION}
+                        'server_volume': ACTION,
+                        'extension': LIST}
 
     def _get_client(self, cxt, session=None):
         url = self.endpoint_url.replace('$(tenant_id)s', cxt.tenant)
@@ -230,6 +231,8 @@ class NovaResourceHandle(ResourceHandle):
     def _adapt_resource(self, resource):
         if resource == 'server_volume':
             return 'volume'
+        elif resource == 'extension':
+            return 'list_extension'
         else:
             return resource
 
@@ -243,6 +246,9 @@ class NovaResourceHandle(ResourceHandle):
                 search_opts = _transform_filters(filters)
                 return [res.to_dict() for res in getattr(client,
                                                          collection).list(search_opts=search_opts)]
+            elif resource == 'list_extension':
+                return [res.to_dict() for res in getattr(client,
+                                                         collection).show_all()]
             else:
                 return [res.to_dict() for res in getattr(client,
                                                          collection).list()]

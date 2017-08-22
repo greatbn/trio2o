@@ -34,6 +34,8 @@ from trio2o.nova_apigw.controllers import network
 from trio2o.nova_apigw.controllers import quota_sets
 from trio2o.nova_apigw.controllers import server
 from trio2o.nova_apigw.controllers import volume
+from trio2o.nova_apigw.controllers import extension
+from trio2o.nova_apigw.controllers import keypair
 
 
 LOG = logging.getLogger(__name__)
@@ -71,7 +73,7 @@ class V21Controller(object):
             'os-networks': network.NetworkController,
             ### To Do
             # 'os-hypervisors': hypervisor.HypervisorController,
-            # 'extensions': extension.ExtensionController,
+            'extensions': extension.ExtensionController,
             'os-keypairs': keypair.KeypairController
         }
         self.server_sub_controller = {
